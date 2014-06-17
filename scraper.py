@@ -5,6 +5,19 @@ import sys
 
 
 def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
+    u"""
+    Return content and encoding of a response to a query of CL.
+
+    Submits a request to http://seattle.craigslist.org/search/apa as
+    search paramaters and returns the content and encoding of the
+    server's response.
+
+    Keyword arguments:
+    bedrooms: An int indicating the minimum number of bedrooms.
+    minAsk: An int indicating the minimum monthly rent.
+    maxAsk: An int indicating the maximum monthly rent.
+    query: A string representing other search terms 'parking', 'bus', etc.
+    """
     url = "http://seattle.craigslist.org/search/apa"
     params = {}
     for k, v in locals().items():
@@ -21,15 +34,25 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
 
 
 def read_search_results(results='apartments.html'):
+    u"""Returns the contents of a local html file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
         return source.read(), 'utf-8'
 
 
 def parse_source(body, encoding='utf-8'):
+    u"""Return HTML parsed by BeautifulSoup."""
     return BeautifulSoup(body, from_encoding=encoding)
 
 
 def extract_listings(parsed_html):
+    u"""
+    Return list of dicts containing attributes of listed apartments.
+
+    Accepts BeautifulSoup parsed HTML.  Searches and traverses
+    the parsed HTML for each listing and collects the link to,
+    description of, price, and size of each apartment.  These values
+    are returned in a list that contains one dictionary per apartment.
+    """
     listings = parsed_html.find_all('p', class_="row")
     data = []
     for listing in listings:
