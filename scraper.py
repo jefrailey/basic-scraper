@@ -38,9 +38,14 @@ def extract_listings(parsed_html):
     data = []
     for listing in listings:
         link = listing.find('span', class_='pl').find('a')
+        price = listing.find('span', class_='price')
+        # price_span = listing.find('span', class_='price')
+        size = price.next_sibling.strip('\n-/')
         this_listing = {
             'link': link.attrs['href'],
-            'description': link.string.strip()
+            'description': link.string.strip(),
+            'price': price.string.strip(),
+            'size': size
         }
         data.append(this_listing)
     return data
@@ -51,7 +56,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
         body, encoding = read_search_results()
     else:
-        body, encoding = search_CL()
+        body, encoding = search_CL(minAsk=500, maxAsk=1000, bedrooms=2)
     parsed = parse_source(body, encoding)
     listings = extract_listings(parsed)
     print "Number of listings: {}".format(len(listings))
