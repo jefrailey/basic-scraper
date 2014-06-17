@@ -19,10 +19,6 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
     else:
         response.raise_for_status()
 
-# response, encoding = search_CL()
-# with open('apartments.html', 'w') as outfile:
-#     outfile.write(response)
-
 
 def read_search_results(results='apartments.html'):
     with open(os.getcwd() + '/' + results, 'r') as source:
