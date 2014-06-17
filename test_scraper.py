@@ -26,6 +26,7 @@ def test_parse_source():
 def test_extract_listings():
     test_body, test_encoding = read_search_results()
     test_parse = parse_source(test_body, test_encoding)
-    for row in extract_listings(test_parse):
-        print type(row)
-        assert isinstance(row, bs4.element.Tag)
+    test_data = extract_listings(test_parse)
+    assert isinstance(test_data, list)
+    for dict_ in test_data:
+        assert isinstance(dict_, dict)
