@@ -35,12 +35,24 @@ def parse_source(body, encoding='utf-8'):
 
 def extract_listings(parsed_html):
     listings = parsed_html.find_all('p', class_="row")
-    return listings
+    data = []
+    for listing in listings:
+        link = listing.find('span', class_='pl').find('a')
+        this_listing = {
+            'link': link.attrs['href'],
+            'description': link.string.strip()
+        }
+        data.append(this_listing)
+    return data
 
 
 if __name__ == "__main__":
+    import pprint
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
         body, encoding = read_search_results()
     else:
         body, encoding = search_CL()
     parsed = parse_source(body, encoding)
+    listings = extract_listings(parsed)
+    print "Number of listings: {}".format(len(listings))
+    pprint.pprint(listings[0])
