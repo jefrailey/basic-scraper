@@ -6,7 +6,7 @@ import bs4
 
 
 def test_search_CL():
-    test_body, test_encoding = search_CL(minAsk=100, maxAsk=100)
+    test_body, test_encoding = search_CL(minAsk=500, maxAsk=1000, bedrooms=2)
     assert "<span class=\"desktop\">craigslist</span>" in test_body
     assert test_encoding == 'utf-8'
 

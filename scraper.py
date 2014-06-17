@@ -19,9 +19,9 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
     else:
         response.raise_for_status()
 
-response, encoding = search_CL()
-with open('apartments.html', 'w') as outfile:
-    outfile.write(response)
+# response, encoding = search_CL()
+# with open('apartments.html', 'w') as outfile:
+#     outfile.write(response)
 
 
 def read_search_results(results='apartments.html'):
@@ -39,7 +39,6 @@ def extract_listings(parsed_html):
     for listing in listings:
         link = listing.find('span', class_='pl').find('a')
         price = listing.find('span', class_='price')
-        # price_span = listing.find('span', class_='price')
         size = price.next_sibling.strip('\n-/')
         this_listing = {
             'link': link.attrs['href'],
@@ -56,7 +55,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
         body, encoding = read_search_results()
     else:
-        body, encoding = search_CL(minAsk=500, maxAsk=1000, bedrooms=2)
+        body, encoding = search_CL(minAsk=1000, maxAsk=1500, bedrooms=2)
+        response, encoding = search_CL()
+        with open('apartments.html', 'w') as outfile:
+            outfile.write(response)
     parsed = parse_source(body, encoding)
     listings = extract_listings(parsed)
     print "Number of listings: {}".format(len(listings))
