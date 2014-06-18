@@ -2,6 +2,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import sys
+import json
 
 
 def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
@@ -63,7 +64,8 @@ def read_search_results(results='apartments.html'):
 def read_json_results(results='apartments.json'):
     u"""Returns the contents of a local json file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
-        return source.read()
+        json_string = source.read()
+        return json.loads(json_string)
 
 
 def parse_source(body, encoding='utf-8'):
@@ -132,7 +134,7 @@ if __name__ == "__main__":
             outfile.write(response)
         json_res = fetch_json_results(minAsk=1000, maxAsk=1500, bedrooms=2)
         with open('apartments.json', 'w') as outfile:
-            outfile.write(str(json_res))
+            outfile.write(json.dumps(json_res))
     parsed = parse_source(response, encoding)
     search = {j['PostingID']: j for j in json_res[0]}
     for listing in extract_listings(parsed):
