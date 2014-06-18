@@ -4,6 +4,7 @@ from scraper import parse_source
 from scraper import extract_listings
 from scraper import fetch_json_results
 from scraper import read_json_results
+from scraper import add_location
 from types import GeneratorType
 import bs4
 
@@ -49,3 +50,20 @@ def test_extract_listings():
     assert isinstance(test_data, GeneratorType)
     for dict_ in test_data:
         assert isinstance(dict_, dict)
+
+
+def test_add_location_1():
+    listing = {'pid': u'1'}
+    search = {
+        u'1': {'Latitude': 45.0, 'Longitude': 90.0},
+        u'2': {'Latitude': 30.0, 'Longitude': 90.0}
+    }
+    assert add_location(listing, search) == True
+
+def test_add_location_2():
+    listing = {'pid': u'3'}
+    search = {
+        u'1': {'Latitude': 45.0, 'Longitude': 90.0},
+        u'2': {'Latitude': 30.0, 'Longitude': 90.0}
+    }
+    assert add_location(listing, search) == False
