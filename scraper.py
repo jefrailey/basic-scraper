@@ -47,6 +47,11 @@ def read_search_results(results='apartments.html'):
         return source.read(), 'utf-8'
 
 
+def read_json_results(results='apartments.json'):
+    with open(os.getcwd() + '/' + results, 'r') as source:
+        return source.read()
+
+
 def parse_source(body, encoding='utf-8'):
     u"""Return HTML parsed by BeautifulSoup."""
     return BeautifulSoup(body, from_encoding=encoding)
@@ -92,17 +97,14 @@ def add_location(listing, search):
 
 def add_address(listing):
     url = 'http://maps.googleapis.com/maps/api/geocode/json'
-    # lat = listing['location']['data-latitude']
-    # lng = listing['location']['data-longitude']
-    latlng = "{data-latitude}{data-longitude}".format(**listing['location'])
+    latlng = "{data-latitude},{data-longitude}".format(**listing['location'])
     parameters = {'latlng': latlng, 'sensor': 'false'}
     response = requests.get(url, params=parameters)
     response.raise_for_status()
-    data = json.loads(response.text)
+    data = response.json()
     if data['status'] == 'OK':
-        addr = data['results'][0]['address_components'][0]['formatted_address']
-        print addr
-        listing['address'] = addr
+        best = data['results'][0]
+        listing['address'] = best['formatted_address']
     else:
         listing['address'] = 'unavailable'
     return listing
@@ -111,19 +113,18 @@ def add_address(listing):
 if __name__ == "__main__":
     import pprint
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        body, encoding = read_search_results()
+        response, encoding = read_search_results()
+        json_res = read_json_results()
     else:
-        body, encoding = search_CL(minAsk=1000, maxAsk=1500, bedrooms=2)
-        response, encoding = search_CL()
+        response, encoding = search_CL(minAsk=1000, maxAsk=1500, bedrooms=2)
         with open('apartments.html', 'w') as outfile:
             outfile.write(response)
-    parsed = parse_source(body, encoding)
-    json_res = fetch_json_results(minAsk=1000, maxAsk=1500, bedrooms=2)
+        json_res = fetch_json_results(minAsk=1000, maxAsk=1500, bedrooms=2)
+        with open('apartments.json', 'w') as outfile:
+            outfile.write(str(json_res))
+    parsed = parse_source(response, encoding)
     search = {j['PostingID']: j for j in json_res[0]}
     for listing in extract_listings(parsed):
         if (add_location(listing, search)):
             listing = add_address(listing)
             pprint.pprint(listing)
-    # listings = extract_listings(parsed)
-    # # print "Number of listings: {}".format(len(listings))
-    # # pprint.pprint(listings[0])
