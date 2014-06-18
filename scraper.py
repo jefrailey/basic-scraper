@@ -2,7 +2,6 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import sys
-import json
 
 
 def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
@@ -25,7 +24,7 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
         if v is not None:
             params[k] = v
     if not params:
-        raise ValueError("No keywords given")
+        raise ValueError(u"No keywords given")
     else:
         response = requests.get(url, params=params)
     if response.ok:
@@ -35,6 +34,20 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
 
 
 def fetch_json_results(**kwargs):
+    u"""
+    Return content of a response to a json query of CL.
+
+    Submits a request to http://seattle.craigslist.org/jsonsearch/apa as
+    search paramaters and returns the content of the
+    server's response.  The search arguments need to match
+    search_CL()'s in order for this to collect the corresponding data.
+
+    Keyword arguments:
+    bedrooms: An int indicating the minimum number of bedrooms.
+    minAsk: An int indicating the minimum monthly rent.
+    maxAsk: An int indicating the maximum monthly rent.
+    query: A string representing other search terms 'parking', 'bus', etc.
+    """
     url = 'http://seattle.craigslist.org/jsonsearch/apa'
     results = requests.get(url, params=kwargs)
     results.raise_for_status()
@@ -48,6 +61,7 @@ def read_search_results(results='apartments.html'):
 
 
 def read_json_results(results='apartments.json'):
+    u"""Returns the contents of a local json file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
         return source.read()
 
@@ -67,7 +81,6 @@ def extract_listings(parsed_html):
     are returned in a list that contains one dictionary per apartment.
     """
     listings = parsed_html.find_all('p', class_="row")
-    # data = []
     for listing in listings:
         link = listing.find('span', class_='pl').find('a')
         price = listing.find('span', class_='price')
@@ -79,8 +92,6 @@ def extract_listings(parsed_html):
             'price': price.string.strip(),
             'size': size
         }
-        # data.append(this_listing)
-    # return data
         yield this_listing
 
 
