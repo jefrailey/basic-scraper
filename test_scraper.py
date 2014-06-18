@@ -5,6 +5,7 @@ from scraper import extract_listings
 from scraper import fetch_json_results
 from scraper import read_json_results
 from scraper import add_location
+from scraper import add_address
 from types import GeneratorType
 import bs4
 
@@ -70,5 +71,18 @@ def test_add_location_2():
     assert add_location(listing, search) is False
 
 
-def test_add_address():
-    pass
+def test_add_address_1():
+    listing = {
+        'pid': '1',
+        'location': {'data-latitude': None, 'data-longitude': None}
+        }
+    assert add_address(listing)['address'] == 'unavailable'
+    # print add_address(listing)['address']
+
+
+def test_add_address_2():
+    listing = {
+        'pid': '1',
+        'location': {'data-latitude': 45.0, 'data-longitude': 90.0}
+        }
+    assert add_address(listing)['address'] == 'S228, Qitai, Changji, Xinjiang, China'
