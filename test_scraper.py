@@ -58,7 +58,8 @@ def test_add_location_1():
         u'1': {'Latitude': 45.0, 'Longitude': 90.0},
         u'2': {'Latitude': 30.0, 'Longitude': 90.0}
     }
-    assert add_location(listing, search) == True
+    assert add_location(listing, search) is True
+
 
 def test_add_location_2():
     listing = {'pid': u'3'}
@@ -66,4 +67,8 @@ def test_add_location_2():
         u'1': {'Latitude': 45.0, 'Longitude': 90.0},
         u'2': {'Latitude': 30.0, 'Longitude': 90.0}
     }
-    assert add_location(listing, search) == False
+    assert add_location(listing, search) is False
+
+
+def test_add_address():
+    pass
