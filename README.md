@@ -1,6 +1,8 @@
 basic-scraper
 =============
 
+[![Build Status](https://travis-ci.org/jefrailey/basic-scraper.svg)](https://travis-ci.org/jefrailey/basic-scraper)
+
 This module contains functions designed to scrape Seattle apartment listings on Craigslist as outlined in [this tutorial](http://codefellows.github.io/python-dev-accelerator/assignments/day11/scraper.html).
 It uses [Requests](http://docs.python-requests.org/en/latest/) to obtain the HTML and [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/) to parse it.
 
