@@ -2,6 +2,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import sys
+import json
 
 
 def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
@@ -33,6 +34,13 @@ def search_CL(bedrooms=None, minAsk=None, maxAsk=None, query=None):
         response.raise_for_status()
 
 
+def fetch_json_results(**kwargs):
+    url = 'http://seattle.craigslist.org/jsonsearch/apa'
+    results = requests.get(url, params=kwargs)
+    results.raise_for_status()
+    return results.json()
+
+
 def read_search_results(results='apartments.html'):
     u"""Returns the contents of a local html file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
@@ -54,19 +62,50 @@ def extract_listings(parsed_html):
     are returned in a list that contains one dictionary per apartment.
     """
     listings = parsed_html.find_all('p', class_="row")
-    data = []
+    # data = []
     for listing in listings:
         link = listing.find('span', class_='pl').find('a')
         price = listing.find('span', class_='price')
         size = price.next_sibling.strip('\n-/')
         this_listing = {
+            'pid': listing.attrs.get('data-pid', ''),
             'link': link.attrs['href'],
             'description': link.string.strip(),
             'price': price.string.strip(),
             'size': size
         }
-        data.append(this_listing)
-    return data
+        # data.append(this_listing)
+    # return data
+        yield this_listing
+
+
+def add_location(listing, search):
+    if listing['pid'] in search:
+        match = search[listing['pid']]
+        listing['location'] = {
+            'data-latitude': match.get('Latitude', ''),
+            'data-longitude': match.get('Longitude', '')
+        }
+        return True
+    return False
+
+
+def add_address(listing):
+    url = 'http://maps.googleapis.com/maps/api/geocode/json'
+    # lat = listing['location']['data-latitude']
+    # lng = listing['location']['data-longitude']
+    latlng = "{data-latitude}{data-longitude}".format(**listing['location'])
+    parameters = {'latlng': latlng, 'sensor': 'false'}
+    response = requests.get(url, params=parameters)
+    response.raise_for_status()
+    data = json.loads(response.text)
+    if data['status'] == 'OK':
+        addr = data['results'][0]['address_components'][0]['formatted_address']
+        print addr
+        listing['address'] = addr
+    else:
+        listing['address'] = 'unavailable'
+    return listing
 
 
 if __name__ == "__main__":
@@ -79,6 +118,12 @@ if __name__ == "__main__":
         with open('apartments.html', 'w') as outfile:
             outfile.write(response)
     parsed = parse_source(body, encoding)
-    listings = extract_listings(parsed)
-    print "Number of listings: {}".format(len(listings))
-    pprint.pprint(listings[0])
+    json_res = fetch_json_results(minAsk=1000, maxAsk=1500, bedrooms=2)
+    search = {j['PostingID']: j for j in json_res[0]}
+    for listing in extract_listings(parsed):
+        if (add_location(listing, search)):
+            listing = add_address(listing)
+            pprint.pprint(listing)
+    # listings = extract_listings(parsed)
+    # # print "Number of listings: {}".format(len(listings))
+    # # pprint.pprint(listings[0])
