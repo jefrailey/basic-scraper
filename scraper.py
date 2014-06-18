@@ -56,13 +56,13 @@ def fetch_json_results(**kwargs):
 
 
 def read_search_results(results='apartments.html'):
-    u"""Returns the contents of a local html file."""
+    u"""Return the contents of a local html file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
         return source.read(), 'utf-8'
 
 
 def read_json_results(results='apartments.json'):
-    u"""Returns the contents of a local json file."""
+    u"""Return the contents of a local json file."""
     with open(os.getcwd() + '/' + results, 'r') as source:
         json_string = source.read()
         return json.loads(json_string)
@@ -75,12 +75,14 @@ def parse_source(body, encoding='utf-8'):
 
 def extract_listings(parsed_html):
     u"""
-    Return list of dicts containing attributes of listed apartments.
+    Yield list of dicts containing attributes of listed apartments.
 
     Accepts BeautifulSoup parsed HTML.  Searches and traverses
     the parsed HTML for each listing and collects the link to,
-    description of, price, and size of each apartment.  These values
-    are returned in a list that contains one dictionary per apartment.
+    description of, price, and size of each apartment.
+
+    Yield:
+    Dictionary containing apartment attributes.
     """
     listings = parsed_html.find_all('p', class_="row")
     for listing in listings:
@@ -98,6 +100,17 @@ def extract_listings(parsed_html):
 
 
 def add_location(listing, search):
+    u"""
+    Merge latt/long search results into the listing's dictionary.
+
+    Accepts a dictionary representing a listing on CL and adds the
+    lattitude and longitude specificed for that listing in a
+    CL JSON search.
+
+    Return:
+    True: If listing's identifier (pid) is in the search output.
+    False: If listing's identifier (pid) is not in the search output.
+    """
     if listing['pid'] in search:
         match = search[listing['pid']]
         listing['location'] = {
@@ -109,6 +122,14 @@ def add_location(listing, search):
 
 
 def add_address(listing):
+    u"""
+    Return the listing with an address from Google Maps based on lat/long.
+
+    Return:
+    Dictionary with a new key, 'address', that ncludes the an address for the
+    listing's lat/long if it can be determined or the string 'unavailable' if
+    it can't.
+    """
     url = 'http://maps.googleapis.com/maps/api/geocode/json'
     latlng = "{data-latitude},{data-longitude}".format(**listing['location'])
     parameters = {'latlng': latlng, 'sensor': 'false'}
