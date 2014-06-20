@@ -57,13 +57,13 @@ def fetch_json_results(**kwargs):
 
 def read_search_results(results='apartments.html'):
     u"""Return the contents of a local html file."""
-    with open(os.getcwd() + '/' + results, 'r') as source:
+    with open(results, 'r') as source:
         return source.read(), 'utf-8'
 
 
 def read_json_results(results='apartments.json'):
     u"""Return the contents of a local json file."""
-    with open(os.getcwd() + '/' + results, 'r') as source:
+    with open(results, 'r') as source:
         json_string = source.read()
         return json.loads(json_string)
 
